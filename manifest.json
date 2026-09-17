@@ -1,0 +1,22 @@
+{
+  "name": "estadisticas-edificaciones",
+  "label": "Estadísticas de Edificaciones",
+  "type": "widget",
+  "version": "1.21.0",
+  "exbVersion": "1.21.0",
+  "author": "UNGRD - Gestión del Riesgo Chocó",
+  "description": "Visualizador de estadísticas y diagramas interactivos del Inventario Consolidado de Edificaciones Afectadas",
+  "copyright": "UNGRD 2026",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "hasSetting": true
+  },
+  "translatedLocales": [
+    "en",
+    "es"
+  ],
+  "defaultSize": {
+    "width": 520,
+    "height": 620
+  }
+}

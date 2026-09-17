@@ -1,0 +1,8 @@
+{
+  "serviceUrl": "https://eqchoco.gestiondelriesgo.gov.co/server/rest/services/Hosted/inventario_de_edificaciones_/FeatureServer/0",
+  "webmapId": "0bc13c7a26c54ce58f0d345a198f1fc2",
+  "portalUrl": "https://eqchoco.gestiondelriesgo.gov.co/portal",
+  "title": "Evaluación de Daños en Edificaciones",
+  "enableFilters": true,
+  "defaultView": "damage"
+}

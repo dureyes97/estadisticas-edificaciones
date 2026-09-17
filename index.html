@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estadísticas de Edificaciones Afectadas - UNGRD Chocó</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    .dashboard-wrapper {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 600px;
+    }
+
+    /* ── Header ── */
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: #09090b;
+      color: #ffffff;
+      border-bottom: 1px solid #27272a;
+    }
+
+    .dash-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dash-logo-img {
+      height: 32px;
+      max-width: 130px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .dash-title-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dash-pill {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #93c5fd;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dash-pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 9999px;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+
+    .dash-heading {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.015em;
+      margin: 0;
+    }
+
+    .btn-icon-head {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-icon-head:hover {
+      background: #27272a;
+      color: #ffffff;
+    }
+
+    /* ── Barra de Filtros ── */
+    .dash-filter-bar {
+      padding: 10px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-select {
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 0.75rem;
+      font-family: inherit;
+      padding: 0 8px;
+      outline: none;
+      cursor: pointer;
+      flex: 1;
+      min-width: 130px;
+      transition: border-color 0.15s ease;
+    }
+    .filter-select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px #2563eb;
+    }
+
+    .btn-reset {
+      height: 32px;
+      padding: 0 10px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #64748b;
+      font-size: 0.72rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-reset:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    /* ── KPIs Cards ── */
+    .kpi-grid {
+      padding: 14px 16px 8px 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .kpi-card {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 4px;
+    }
+    .kpi-total::before { background: #2563eb; }
+    .kpi-destroyed::before { background: #ef4444; }
+    .kpi-damaged::before { background: #f97316; }
+    .kpi-possible::before { background: #eab308; }
+
+    .kpi-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .kpi-value-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .kpi-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+
+    .kpi-percent {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    .percent-destroyed { background: #fee2e2; color: #b91c1c; }
+    .percent-damaged { background: #ffedd5; color: #c2410c; }
+    .percent-possible { background: #fef9c3; color: #a16207; }
+
+    /* ── Tabs Bar ── */
+    .diagram-tabs-bar {
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #ffffff;
+      overflow-x: auto;
+    }
+
+    .diagram-tab-btn {
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #64748b;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .diagram-tab-btn:hover {
+      color: #0f172a;
+    }
+    .diagram-tab-btn.tab-active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+
+    /* ── Content Body ── */
+    .dash-content-area {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .chart-section-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chart-card-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .bar-item-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .bar-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+    }
+
+    .bar-label {
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bar-tag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    .bar-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 9px;
+      background: #f1f5f9;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.4s ease;
+    }
+
+    .donut-chart-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 8px 0;
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+    }
+
+    /* Footer */
+    .dash-footer {
+      padding: 8px 16px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      font-size: 0.68rem;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <!-- Header -->
+    <header class="dash-header">
+      <div class="dash-brand">
+        <img
+          src="https://eqchoco.gestiondelriesgo.gov.co/portal/sharing/rest/content/items/90af96c4ec1c46e9b47a691548365763/data"
+          alt="Logo UNGRD"
+          class="dash-logo-img"
+          onerror="this.style.display='none'"
+        />
+        <div class="dash-title-wrap">
+          <div class="dash-pill">
+            <span class="dash-pill-dot"></span>
+            <span>UNGRD • CHOCÓ SÍSMICO</span>
+          </div>
+          <h1 class="dash-heading">Evaluación de Daños en Edificaciones</h1>
+        </div>
+      </div>
+
+      <button class="btn-icon-head" id="btnRefresh" title="Recargar datos">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Barra de Filtros -->
+    <div class="dash-filter-bar">
+      <select class="filter-select" id="selDpto">
+        <option value="TODOS">📍 Depto: Todos</option>
+      </select>
+
+      <select class="filter-select" id="selMpio">
+        <option value="TODOS">🏙️ Mpio: Todos</option>
+      </select>
+
+      <select class="filter-select" id="selDamage">
+        <option value="TODOS">⚠️ Daño: Todos</option>
+        <option value="Destroyed">🔴 Destruidas</option>
+        <option value="Damaged">🟠 Daño Severo</option>
+        <option value="Possibly damaged">🟡 Posible Daño</option>
+      </select>
+
+      <button class="btn-reset" id="btnReset" style="display:none;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path>
+        </svg>
+        <span>Limpiar</span>
+      </button>
+    </div>
+
+    <!-- KPIs Resumen -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-total">
+        <span class="kpi-title">Evaluadas</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number" id="kpiTotal">0</span>
+          <span style="font-size:0.65rem; color:#64748b;">100%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-destroyed">
+        <span class="kpi-title" style="color:#b91c1c;">Destruidas</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number" id="kpiDestroyed" style="color:#ef4444;">0</span>
+          <span class="kpi-percent percent-destroyed" id="kpiDestroyedPct">0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-damaged">
+        <span class="kpi-title" style="color:#c2410c;">Dañadas</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number" id="kpiDamaged" style="color:#f97316;">0</span>
+          <span class="kpi-percent percent-damaged" id="kpiDamagedPct">0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-possible">
+        <span class="kpi-title" style="color:#a16207;">Posible Daño</span>
+        <div class="kpi-value-row">
+          <span class="kpi-number" id="kpiPossible" style="color:#eab308;">0</span>
+          <span class="kpi-percent percent-possible" id="kpiPossiblePct">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selector de Diagramas -->
+    <div class="diagram-tabs-bar">
+      <button class="diagram-tab-btn tab-active" data-tab="damage">📊 Severidad del Daño</button>
+      <button class="diagram-tab-btn" data-tab="dpto">🍩 Por Departamento</button>
+      <button class="diagram-tab-btn" data-tab="mpio">🗺️ Ranking Municipios</button>
+      <button class="diagram-tab-btn" data-tab="type">🏛️ Tipología / Uso</button>
+    </div>
+
+    <!-- Área de Diagramas -->
+    <div class="dash-content-area" id="diagramContent">
+      <!-- Inyectado dinámicamente -->
+    </div>
+
+    <!-- Footer -->
+    <footer class="dash-footer">
+      <div><strong>Fuente:</strong> Verificación UNGRD / INGV • <strong>Capa:</strong> Inventario Consolidado</div>
+      <div><span id="lblFilterCount">0 / 0</span></div>
+    </footer>
+  </div>
+
+  <script>
+    const serviceUrl = 'https://eqchoco.gestiondelriesgo.gov.co/server/rest/services/Hosted/inventario_de_edificaciones_/FeatureServer/0';
+    let allFeatures = [];
+    let currentTab = 'damage';
+
+    const DAMAGE_COLORS = {
+      'Destroyed': '#ef4444',
+      'Damaged': '#f97316',
+      'Possibly damaged': '#eab308'
+    };
+    const DPTO_COLORS = ['#2563eb', '#7c3aed', '#059669', '#d97706', '#ec4899'];
+
+    async function loadData() {
+      try {
+        const queryUrl = `${serviceUrl}/query?where=1%3D1&outFields=fid,damage_gra,dpto_cnmbr,mpio_cnmbr,type,source&returnGeometry=false&f=json`;
+        const res = await fetch(queryUrl);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.features) {
+            allFeatures = json.features.map(f => ({
+              fid: f.attributes.fid || f.attributes.FID || f.attributes.OBJECTID,
+              damage_gra: (f.attributes.damage_gra || 'Possibly damaged').trim(),
+              dpto_cnmbr: (f.attributes.dpto_cnmbr || 'CHOCÓ').trim(),
+              mpio_cnmbr: (f.attributes.mpio_cnmbr || 'SIN ESPECIFICAR').trim(),
+              type: (f.attributes.type || 'Residencial').trim() || 'Residencial'
+            }));
+            populateSelects();
+            renderDashboard();
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }
+
+    function populateSelects() {
+      const selDpto = document.getElementById('selDpto');
+      const dptos = Array.from(new Set(allFeatures.map(f => f.dpto_cnmbr))).sort();
+      selDpto.innerHTML = '<option value="TODOS">📍 Depto: Todos</option>';
+      dptos.forEach(d => {
+        selDpto.innerHTML += `<option value="${d}">${d}</option>`;
+      });
+      updateMpioSelect();
+    }
+
+    function updateMpioSelect() {
+      const selDpto = document.getElementById('selDpto').value;
+      const selMpio = document.getElementById('selMpio');
+      let subset = allFeatures;
+      if (selDpto !== 'TODOS') {
+        subset = subset.filter(f => f.dpto_cnmbr === selDpto);
+      }
+      const mpios = Array.from(new Set(subset.map(f => f.mpio_cnmbr))).sort();
+      selMpio.innerHTML = '<option value="TODOS">🏙️ Mpio: Todos</option>';
+      mpios.forEach(m => {
+        selMpio.innerHTML += `<option value="${m}">${m}</option>`;
+      });
+    }
+
+    function getFilteredRecords() {
+      const dpto = document.getElementById('selDpto').value;
+      const mpio = document.getElementById('selMpio').value;
+      const damage = document.getElementById('selDamage').value;
+
+      return allFeatures.filter(f => {
+        if (dpto !== 'TODOS' && f.dpto_cnmbr !== dpto) return false;
+        if (mpio !== 'TODOS' && f.mpio_cnmbr !== mpio) return false;
+        if (damage !== 'TODOS' && f.damage_gra !== damage) return false;
+        return true;
+      });
+    }
+
+    function renderDashboard() {
+      const records = getFilteredRecords();
+      const total = records.length;
+      const destroyed = records.filter(f => f.damage_gra === 'Destroyed').length;
+      const damaged = records.filter(f => f.damage_gra === 'Damaged').length;
+      const possible = records.filter(f => f.damage_gra === 'Possibly damaged').length;
+
+      const destPct = total > 0 ? ((destroyed / total) * 100).toFixed(1) : '0';
+      const damPct = total > 0 ? ((damaged / total) * 100).toFixed(1) : '0';
+      const posPct = total > 0 ? ((possible / total) * 100).toFixed(1) : '0';
+
+      document.getElementById('kpiTotal').textContent = total.toLocaleString();
+      document.getElementById('kpiDestroyed').textContent = destroyed.toLocaleString();
+      document.getElementById('kpiDestroyedPct').textContent = `${destPct}%`;
+      document.getElementById('kpiDamaged').textContent = damaged.toLocaleString();
+      document.getElementById('kpiDamagedPct').textContent = `${damPct}%`;
+      document.getElementById('kpiPossible').textContent = possible.toLocaleString();
+      document.getElementById('kpiPossiblePct').textContent = `${posPct}%`;
+
+      document.getElementById('lblFilterCount').textContent = `Filtradas: ${total.toLocaleString()} / ${allFeatures.length.toLocaleString()}`;
+
+      const isFiltered = document.getElementById('selDpto').value !== 'TODOS' ||
+                         document.getElementById('selMpio').value !== 'TODOS' ||
+                         document.getElementById('selDamage').value !== 'TODOS';
+      document.getElementById('btnReset').style.display = isFiltered ? 'flex' : 'none';
+
+      renderTabContent(records, total, destroyed, damaged, possible, destPct, damPct, posPct);
+    }
+
+    function renderTabContent(records, total, destroyed, damaged, possible, destPct, damPct, posPct) {
+      const container = document.getElementById('diagramContent');
+
+      if (currentTab === 'damage') {
+        container.innerHTML = `
+          <div class="chart-section-card">
+            <div class="chart-card-title">
+              <span>Distribución por Severidad del Daño</span>
+              <span style="font-size:0.7rem; color:#64748b;">${total} edificaciones</span>
+            </div>
+            <div class="bar-item-row">
+              <div class="bar-info-row">
+                <span class="bar-label"><span class="bar-tag-dot" style="background:#ef4444;"></span>Destruidas (Colapso Total)</span>
+                <span class="bar-value">${destroyed} (${destPct}%)</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:${destPct}%; background:#ef4444;"></div></div>
+            </div>
+            <div class="bar-item-row">
+              <div class="bar-info-row">
+                <span class="bar-label"><span class="bar-tag-dot" style="background:#f97316;"></span>Dañadas (Daño Estructural Severo)</span>
+                <span class="bar-value">${damaged} (${damPct}%)</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:${damPct}%; background:#f97316;"></div></div>
+            </div>
+            <div class="bar-item-row">
+              <div class="bar-info-row">
+                <span class="bar-label"><span class="bar-tag-dot" style="background:#eab308;"></span>Posible Daño (Afectación Leve / Fisuras)</span>
+                <span class="bar-value">${possible} (${posPct}%)</span>
+              </div>
+              <div class="bar-track"><div class="bar-fill" style="width:${posPct}%; background:#eab308;"></div></div>
+            </div>
+          </div>
+        `;
+      } else if (currentTab === 'dpto') {
+        const counts = {};
+        records.forEach(f => { counts[f.dpto_cnmbr] = (counts[f.dpto_cnmbr] || 0) + 1; });
+        const list = Object.entries(counts).map(([name, count]) => ({ name, count, pct: total > 0 ? ((count / total) * 100).toFixed(1) : '0' })).sort((a,b) => b.count - a.count);
+
+        let svgCircles = '';
+        let cumulative = 0;
+        const r = 46;
+        const c = 60;
+        list.forEach((d, i) => {
+          const frac = total > 0 ? d.count / total : 0;
+          const dash = `${frac * 2 * Math.PI * r} ${2 * Math.PI * r}`;
+          const offset = -cumulative * 2 * Math.PI * r;
+          cumulative += frac;
+          const col = DPTO_COLORS[i % DPTO_COLORS.length];
+          svgCircles += `<circle cx="${c}" cy="${c}" r="${r}" fill="transparent" stroke="${col}" stroke-width="18" stroke-dasharray="${dash}" stroke-dashoffset="${offset}" transform="rotate(-90 ${c} ${c})"/>`;
+        });
+
+        const legendHtml = list.map((d, i) => `
+          <div class="legend-item">
+            <span style="display:flex;align-items:center;gap:6px;font-weight:600;"><span class="bar-tag-dot" style="background:${DPTO_COLORS[i % DPTO_COLORS.length]};"></span>${d.name}</span>
+            <span class="bar-value">${d.count} (${d.pct}%)</span>
+          </div>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="chart-section-card">
+            <div class="chart-card-title">
+              <span>Afectación por Departamento</span>
+              <span style="font-size:0.7rem; color:#64748b;">${list.length} Departamentos</span>
+            </div>
+            <div class="donut-chart-box">
+              <svg width="120" height="120" viewBox="0 0 120 120">
+                ${svgCircles}
+                <text x="60" y="58" text-anchor="middle" font-size="12" font-weight="800" fill="#0f172a">${total}</text>
+                <text x="60" y="70" text-anchor="middle" font-size="7" font-weight="600" fill="#64748b">TOTAL</text>
+              </svg>
+              <div class="donut-legend">${legendHtml}</div>
+            </div>
+          </div>
+        `;
+      } else if (currentTab === 'mpio') {
+        const groups = {};
+        records.forEach(f => {
+          if (!groups[f.mpio_cnmbr]) groups[f.mpio_cnmbr] = { total: 0, dest: 0, dam: 0, pos: 0 };
+          groups[f.mpio_cnmbr].total += 1;
+          if (f.damage_gra === 'Destroyed') groups[f.mpio_cnmbr].dest += 1;
+          else if (f.damage_gra === 'Damaged') groups[f.mpio_cnmbr].dam += 1;
+          else groups[f.mpio_cnmbr].pos += 1;
+        });
+        const list = Object.entries(groups).map(([name, d]) => ({ name, ...d, pct: total > 0 ? ((d.total / total) * 100).toFixed(1) : '0' })).sort((a,b) => b.total - a.total);
+        const maxMpio = list[0]?.total || 1;
+
+        const barsHtml = list.map(m => {
+          const totPct = (m.total / maxMpio) * 100;
+          const destPct = (m.dest / m.total) * 100;
+          const damPct = (m.dam / m.total) * 100;
+          const posPct = (m.pos / m.total) * 100;
+          return `
+            <div class="bar-item-row">
+              <div class="bar-info-row">
+                <span class="bar-label">${m.name}</span>
+                <span class="bar-value">${m.total} <span style="font-size:0.65rem;color:#64748b;">(${m.pct}%)</span></span>
+              </div>
+              <div class="bar-track" style="height:9px;">
+                <div style="width:${totPct}%; height:100%; display:flex; border-radius:5px; overflow:hidden;">
+                  <div style="width:${destPct}%; background:#ef4444;" title="Destruidas: ${m.dest}"></div>
+                  <div style="width:${damPct}%; background:#f97316;" title="Dañadas: ${m.dam}"></div>
+                  <div style="width:${posPct}%; background:#eab308;" title="Posible daño: ${m.pos}"></div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <div class="chart-section-card">
+            <div class="chart-card-title">
+              <span>Top Municipios con Mayor Número de Edificaciones</span>
+              <span style="font-size:0.7rem; color:#64748b;">Segmentado por severidad</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">${barsHtml}</div>
+          </div>
+        `;
+      } else if (currentTab === 'type') {
+        const counts = {};
+        records.forEach(f => {
+          let t = f.type || 'Residencial';
+          if (t === ' ' || t === 'No identificado' || t === 'otro') t = 'Residencial / Mixto';
+          counts[t] = (counts[t] || 0) + 1;
+        });
+        const list = Object.entries(counts).map(([name, count]) => ({ name, count, pct: total > 0 ? ((count / total) * 100).toFixed(1) : '0' })).sort((a,b) => b.count - a.count).slice(0, 8);
+
+        const typesHtml = list.map((t, idx) => `
+          <div class="bar-item-row">
+            <div class="bar-info-row">
+              <span class="bar-label"><span class="bar-tag-dot" style="background:${DPTO_COLORS[idx % DPTO_COLORS.length]};"></span>${t.name}</span>
+              <span class="bar-value">${t.count} (${t.pct}%)</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${t.pct}%; background:${DPTO_COLORS[idx % DPTO_COLORS.length]};"></div></div>
+          </div>
+        `).join('');
+
+        container.innerHTML = `
+          <div class="chart-section-card">
+            <div class="chart-card-title">
+              <span>Clasificación por Uso de la Edificación</span>
+              <span style="font-size:0.7rem; color:#64748b;">Tipologías clave</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">${typesHtml}</div>
+          </div>
+        `;
+      }
+    }
+
+    document.querySelectorAll('.diagram-tab-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        document.querySelectorAll('.diagram-tab-btn').forEach(b => b.classList.remove('tab-active'));
+        btn.classList.add('tab-active');
+        currentTab = btn.getAttribute('data-tab');
+        renderDashboard();
+      });
+    });
+
+    document.getElementById('selDpto').addEventListener('change', () => {
+      updateMpioSelect();
+      renderDashboard();
+    });
+    document.getElementById('selMpio').addEventListener('change', renderDashboard);
+    document.getElementById('selDamage').addEventListener('change', renderDashboard);
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      document.getElementById('selDpto').value = 'TODOS';
+      updateMpioSelect();
+      document.getElementById('selMpio').value = 'TODOS';
+      document.getElementById('selDamage').value = 'TODOS';
+      renderDashboard();
+    });
+
+    document.getElementById('btnRefresh').addEventListener('click', loadData);
+
+    loadData();
+  </script>
+</body>
+</html>
